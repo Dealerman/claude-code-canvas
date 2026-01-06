@@ -1,15 +1,13 @@
 {
   "name": "claude-canvas",
-  "module": "src/cli.ts",
+  "version": "0.1.0",
   "type": "module",
   "private": true,
-  "bin": {
-    "claude-canvas": "src/cli.ts"
-  },
+  "workspaces": ["canvas"],
   "scripts": {
-    "start": "bun run src/cli.ts",
-    "show": "bun run src/cli.ts show",
-    "spawn": "bun run src/cli.ts spawn"
+    "start": "bun run canvas/src/cli.ts",
+    "show": "bun run canvas/src/cli.ts show",
+    "spawn": "bun run canvas/src/cli.ts spawn"
   },
   "devDependencies": {
     "@types/bun": "latest",
