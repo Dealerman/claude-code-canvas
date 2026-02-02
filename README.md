@@ -24,13 +24,13 @@ A TUI toolkit that gives Claude Code its own display. Spawn interactive terminal
 Add this repository as a marketplace in Claude Code:
 
 ```
-/plugin marketplace add dvdsgl/claude-canvas
+/plugin marketplace add Dealerman/claude-code-canvas
 ```
 
 Then install the canvas plugin:
 
 ```
-/plugin install canvas@claude-canvas
+/plugin install canvas@claude-code-canvas
 ```
 
 ## License
