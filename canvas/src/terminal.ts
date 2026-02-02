@@ -987,20 +987,43 @@ async function saveGhosttyPid(pid: number): Promise<void> {
 
 async function createGhosttyWindow(command: string): Promise<boolean> {
   return new Promise((resolve) => {
-    const proc = spawn(
-      "ghostty",
-      ["-e", "/bin/sh", "-c", command],
-      {
-        detached: true,
-        stdio: "ignore",
-      },
-    );
+    let proc;
+
+    if (process.platform === "darwin") {
+      // On macOS, ghostty CLI can't launch the terminal directly.
+      // Use `open -na Ghostty.app` with -e argument passed via --args.
+      proc = spawn(
+        "open",
+        ["-na", "Ghostty.app", "--args", "-e", "/bin/sh", "-c", command],
+        {
+          detached: true,
+          stdio: "ignore",
+        },
+      );
+    } else {
+      proc = spawn(
+        "ghostty",
+        ["-e", "/bin/sh", "-c", command],
+        {
+          detached: true,
+          stdio: "ignore",
+        },
+      );
+    }
 
     if (proc.pid) {
-      saveGhosttyPid(proc.pid);
-
+      // On macOS, the PID from `open` isn't the Ghostty process itself,
+      // so we find the actual Ghostty window PID after a delay
       if (process.platform === "darwin") {
-        setTimeout(() => {
+        setTimeout(async () => {
+          // Find the newest Ghostty process
+          const result = spawnSync("pgrep", ["-n", "ghostty"]);
+          const pid = parseInt(result.stdout?.toString().trim(), 10);
+          if (!isNaN(pid)) {
+            await saveGhosttyPid(pid);
+          }
+
+          // Position window on right half of screen
           const positionScript = `
             tell application "System Events"
               tell process "ghostty"
@@ -1021,7 +1044,9 @@ async function createGhosttyWindow(command: string): Promise<boolean> {
             detached: true,
             stdio: "ignore",
           });
-        }, 500);
+        }, 1000);
+      } else {
+        saveGhosttyPid(proc.pid);
       }
 
       proc.unref();
